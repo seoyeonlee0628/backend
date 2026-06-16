@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="drawer">
+
+<div id="drawer-overlay" onclick="closeDrawer()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:998;"></div>
+<div id="drawer" style="position:fixed;top:0;right:0;bottom:0;width:280px;background:#111118;border-left:1px solid #27272a;z-index:999;transform:translateX(100%);transition:transform .3s cubic-bezier(0.4,0,0.2,1);overflow-y:auto;">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid #27272a;">
+    <span style="font-size:14px;font-weight:700;color:#fafafa;">더 많은 기능</span>
+    <button onclick="closeDrawer()" style="background:none;border:none;cursor:pointer;color:#a1a1aa;padding:4px;"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+  </div>
+  <div style="padding:12px;">
+    <button onclick="drawerGo('interview')" class="drawer-item"><span style="font-size:20px;">💬</span><div style="text-align:left;"><div style="font-size:13px;font-weight:600;color:#fafafa;">면접 준비</div><div style="font-size:11px;color:#a1a1aa;margin-top:2px;">직군별 예상 질문 + 체크리스트</div></div></button>
+    <button onclick="drawerGo('region')" class="drawer-item"><span style="font-size:20px;">📍</span><div style="text-align:left;"><div style="font-size:13px;font-weight:600;color:#fafafa;">지역별 혜택</div><div style="font-size:11px;color:#a1a1aa;margin-top:2px;">내 지역 맞춤 복지 혜택</div></div></button>
+    <button onclick="drawerGo('chatbot')" class="drawer-item"><span style="font-size:20px;">🤖</span><div style="text-align:left;"><div style="font-size:13px;font-weight:600;color:#fafafa;">복지 챗봇</div><div style="font-size:11px;color:#a1a1aa;margin-top:2px;">궁금한 것들을 AI에게 물어보세요</div></div></button>
+    <button onclick="drawerGo('tracker')" class="drawer-item"><span style="font-size:20px;">📋</span><div style="text-align:left;"><div style="font-size:13px;font-weight:600;color:#fafafa;">신청 현황</div><div style="font-size:11px;color:#a1a1aa;margin-top:2px;">혜택 신청 단계별 트래킹</div></div></button>
+    <button onclick="drawerGo('scrapbook')" class="drawer-item"><span style="font-size:20px;">📌</span><div style="text-align:left;"><div style="font-size:13px;font-weight:600;color:#fafafa;">스크랩북</div><div style="font-size:11px;color:#a1a1aa;margin-top:2px;">유용한 링크와 정보 저장</div></div></button>
+    <button onclick="drawerGo('notifications')" class="drawer-item"><span style="font-size:20px;">🔔</span><div style="text-align:left;"><div style="font-size:13px;font-weight:600;color:#fafafa;">알림 설정</div><div style="font-size:11px;color:#a1a1aa;margin-top:2px;">마감 알림 받기</div></div></button>
+    <button onclick="drawerGo('matching')" class="drawer-item"><span style="font-size:20px;">🤝</span><div style="text-align:left;"><div style="font-size:13px;font-weight:600;color:#fafafa;">같은 상황 친구 찾기</div><div style="font-size:11px;color:#a1a1aa;margin-top:2px;">비슷한 취준생 연결</div></div></button>
+    <button onclick="drawerGo('calculator')" class="drawer-item"><span style="font-size:20px;">🧮</span><div style="text-align:left;"><div style="font-size:13px;font-weight:600;color:#fafafa;">혜택 계산기</div><div style="font-size:11px;color:#a1a1aa;margin-top:2px;">예상 수혜액 계산</div></div></button>
+    <button onclick="drawerGo('documents')" class="drawer-item"><span style="font-size:20px;">📝</span><div style="text-align:left;"><div style="font-size:13px;font-weight:600;color:#fafafa;">서류 체크리스트</div><div style="font-size:11px;color:#a1a1aa;margin-top:2px;">자소서·이력서 필수 항목</div></div></button>
+    <button onclick="drawerGo('report')" class="drawer-item"><span style="font-size:20px;">📊</span><div style="text-align:left;"><div style="font-size:13px;font-weight:600;color:#fafafa;">월별 리포트</div><div style="font-size:11px;color:#a1a1aa;margin-top:2px;">이번 달 활동 요약</div></div></button>
+  </div>
+</div>
+<style>
+.drawer-item { width:100%;display:flex;align-items:center;gap:14px;padding:14px 12px;border-radius:12px;border:none;background:transparent;cursor:pointer;transition:background .2s;margin-bottom:4px; }
+.drawer-item:hover { background:rgba(6,182,212,0.08); }
+</style>
+
+</th:block>
+</body>
+</html>

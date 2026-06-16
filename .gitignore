@@ -1,0 +1,26 @@
+.env
+target/
+*.class
+
+# 로그
+*.log
+app-err.log
+app.log
+boot-err.log
+boot.log
+ml-err.log
+ml.log
+ml_model/server*.log
+
+# ML 모델 (용량 큼)
+ml_model/model.pkl
+ml_model/__pycache__/
+
+# IDE
+.classpath
+.factorypath
+.project
+.settings/
+.vscode/
+.idea/
+*.iml

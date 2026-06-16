@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="mypage" id="page-mypage" class="page pt-16 min-h-screen">
+  <div class="max-w-lg mx-auto px-6 py-10">
+    <div class="flex items-center justify-between mb-8">
+      <h1 class="text-2xl font-bold">내 정보</h1>
+      <button onclick="goPage('home')" class="text-sm text-muted-foreground hover:text-foreground transition-colors">← 홈으로</button>
+    </div>
+
+    <!-- 프로필 -->
+    <div class="bg-card border border-border rounded-2xl p-6 mb-5">
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-cyan-400 flex items-center justify-center text-2xl font-bold text-background" id="mypage-avatar"></div>
+        <div>
+          <div class="font-bold text-lg flex items-center gap-1.5"><span id="mypage-nickname-emoji" class="text-xl"></span><span id="mypage-nickname"></span></div>
+          <div class="text-sm text-muted-foreground" id="mypage-username"></div>
+          <div class="text-xs text-muted-foreground mt-1" id="mypage-role"></div>
+          <div class="flex items-center gap-3 mt-2">
+            <span class="text-xs font-bold text-primary" id="mypage-points">0P</span>
+            <span class="text-xs text-muted-foreground" id="mypage-streak"></span>
+          </div>
+        </div>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="text-xs text-muted-foreground mb-1.5 block font-medium">닉네임 변경</label>
+          <div class="flex gap-2">
+            <input id="my-new-nick" type="text" placeholder="새 닉네임 입력" class="flex-1 bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
+            <button onclick="checkMyNick()" class="px-4 py-3 bg-muted hover:bg-muted/70 text-sm rounded-xl transition-colors whitespace-nowrap font-medium">중복확인</button>
+          </div>
+          <p id="my-nick-msg" class="text-xs mt-1 hidden"></p>
+        </div>
+        <button onclick="changeNickname()" class="w-full py-3 bg-primary/10 text-primary font-semibold rounded-xl text-sm hover:bg-primary/20 transition-colors">닉네임 변경하기</button>
+      </div>
+    </div>
+
+    <!-- 포인트 & 뱃지 -->
+    <div class="bg-card border border-border rounded-2xl p-6 mb-5">
+      <h3 class="font-semibold mb-4">포인트 &amp; 뱃지</h3>
+      <div class="grid grid-cols-2 gap-3 mb-4">
+        <div class="bg-primary/5 border border-primary/20 rounded-xl p-3 text-center">
+          <div class="text-2xl font-extrabold text-primary" id="mypage-points-big">0</div>
+          <div class="text-xs text-muted-foreground mt-0.5">보유 포인트</div>
+        </div>
+        <div class="bg-muted/30 border border-border rounded-xl p-3 text-center">
+          <div class="text-2xl font-extrabold" id="mypage-streak-big">0</div>
+          <div class="text-xs text-muted-foreground mt-0.5">연속 출석일</div>
+        </div>
+      </div>
+      <div class="mb-4">
+        <div class="text-xs text-muted-foreground mb-2 font-medium">획득한 뱃지</div>
+        <div id="mypage-badges" class="flex flex-wrap gap-2">
+          <div class="text-xs text-muted-foreground">아직 획득한 뱃지가 없어요. 매일 출석해보세요!</div>
+        </div>
+      </div>
+      <!-- 이모지 장착 -->
+      <div class="border-t border-border pt-4">
+        <div class="flex items-center justify-between mb-3">
+          <div class="text-xs text-muted-foreground font-medium">이모지 장착</div>
+          <div class="text-xs text-muted-foreground">현재: <span id="mypage-current-emoji-display" class="font-bold text-foreground">없음</span></div>
+        </div>
+        <div class="grid grid-cols-4 gap-2" id="mypage-emoji-equip-grid">
+          <button onclick="equipEmojiFromMypage('💼')" data-emoji="💼" class="equip-emoji-btn flex flex-col items-center gap-1 p-3 bg-background border border-border rounded-xl hover:border-primary transition-all"><span class="text-xl">💼</span></button>
+          <button onclick="equipEmojiFromMypage('🚀')" data-emoji="🚀" class="equip-emoji-btn flex flex-col items-center gap-1 p-3 bg-background border border-border rounded-xl hover:border-primary transition-all"><span class="text-xl">🚀</span></button>
+          <button onclick="equipEmojiFromMypage('✨')" data-emoji="✨" class="equip-emoji-btn flex flex-col items-center gap-1 p-3 bg-background border border-border rounded-xl hover:border-primary transition-all"><span class="text-xl">✨</span></button>
+          <button onclick="equipEmojiFromMypage('🔥')" data-emoji="🔥" class="equip-emoji-btn flex flex-col items-center gap-1 p-3 bg-background border border-border rounded-xl hover:border-primary transition-all"><span class="text-xl">🔥</span></button>
+          <button onclick="equipEmojiFromMypage('⚡')" data-emoji="⚡" class="equip-emoji-btn flex flex-col items-center gap-1 p-3 bg-background border border-border rounded-xl hover:border-primary transition-all"><span class="text-xl">⚡</span></button>
+          <button onclick="equipEmojiFromMypage('🎯')" data-emoji="🎯" class="equip-emoji-btn flex flex-col items-center gap-1 p-3 bg-background border border-border rounded-xl hover:border-primary transition-all"><span class="text-xl">🎯</span></button>
+          <button onclick="equipEmojiFromMypage('🌱')" data-emoji="🌱" class="equip-emoji-btn flex flex-col items-center gap-1 p-3 bg-background border border-border rounded-xl hover:border-primary transition-all"><span class="text-xl">🌱</span></button>
+          <button onclick="equipEmojiFromMypage('💎')" data-emoji="💎" class="equip-emoji-btn flex flex-col items-center gap-1 p-3 bg-background border border-border rounded-xl hover:border-primary transition-all"><span class="text-xl">💎</span></button>
+        </div>
+        <button onclick="equipEmojiFromMypage('')" class="mt-2 w-full py-2 text-xs text-muted-foreground border border-border rounded-xl hover:text-foreground hover:border-border/80 transition-colors">이모지 해제</button>
+        <p class="text-xs text-muted-foreground mt-2 text-center">뱃지 샵에서 구매 후 여기서 자유롭게 바꿀 수 있어요</p>
+      </div>
+    </div>
+
+    <!-- 비밀번호 변경 -->
+    <div class="bg-card border border-border rounded-2xl p-6 mb-5">
+      <h3 class="font-semibold mb-4">비밀번호 변경</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="text-xs text-muted-foreground mb-1.5 block font-medium">현재 비밀번호</label>
+          <input id="my-cur-pw" type="password" placeholder="현재 비밀번호" class="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
+        </div>
+        <div>
+          <label class="text-xs text-muted-foreground mb-1.5 block font-medium">새 비밀번호</label>
+          <input id="my-new-pw" type="password" placeholder="새 비밀번호 (4자 이상)" class="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
+        </div>
+        <div>
+          <label class="text-xs text-muted-foreground mb-1.5 block font-medium">새 비밀번호 확인</label>
+          <input id="my-new-pw2" type="password" placeholder="새 비밀번호 재입력" class="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
+        </div>
+        <div id="my-pw-err" class="hidden text-xs text-destructive bg-destructive/10 rounded-lg px-3 py-2"></div>
+        <button onclick="changePassword()" class="w-full py-3 bg-primary/10 text-primary font-semibold rounded-xl text-sm hover:bg-primary/20 transition-colors">비밀번호 변경하기</button>
+      </div>
+    </div>
+
+    <!-- 찜한 혜택 -->
+    <div class="bg-card border border-border rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold">찜한 혜택</h3>
+        <button onclick="goPage('calendar')" class="text-xs text-primary hover:underline">캘린더 보기 →</button>
+      </div>
+      <div id="mypage-wish-list" class="space-y-3"></div>
+      <div id="mypage-wish-empty" class="text-center py-6 text-muted-foreground text-sm">아직 찜한 혜택이 없어요</div>
+    </div>
+
+    <!-- 내 활동 탭 -->
+    <div class="bg-card border border-border rounded-2xl p-6 mt-5">
+      <div class="flex items-center gap-3 mb-5">
+        <button onclick="switchMyTab('my-posts-tab')" id="tab-my-posts" class="px-4 py-2 rounded-xl text-sm font-medium bg-primary/10 text-primary transition-all">내가 쓴 글</button>
+        <button onclick="switchMyTab('my-likes-tab')" id="tab-my-likes" class="px-4 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground transition-all">좋아요한 글</button>
+        <button onclick="switchMyTab('my-bookmarks-tab')" id="tab-my-bookmarks" class="px-4 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground transition-all">북마크</button>
+      </div>
+      <div id="my-posts-tab">
+        <div id="my-posts-content" class="space-y-2">
+          <div class="text-sm text-muted-foreground text-center py-6">작성한 게시글이 없어요</div>
+        </div>
+      </div>
+      <div id="my-likes-tab" class="hidden">
+        <div id="my-likes-content" class="space-y-2">
+          <div class="text-sm text-muted-foreground text-center py-6">좋아요한 게시글이 없어요</div>
+        </div>
+      </div>
+      <div id="my-bookmarks-tab" class="hidden">
+        <div id="my-bookmarks-content" class="space-y-2">
+          <div class="text-sm text-muted-foreground text-center py-6">북마크한 게시글이 없어요</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

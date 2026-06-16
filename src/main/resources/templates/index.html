@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head}"></head>
+<body class="bg-background text-foreground light-mode">
+
+<th:block th:replace="~{fragments/header :: header}"></th:block>
+<th:block th:replace="~{fragments/ui/modals :: modals}"></th:block>
+
+<th:block th:replace="~{fragments/pages/home :: home}"></th:block>
+<th:block th:replace="~{fragments/pages/diagnosis :: diagnosis}"></th:block>
+<th:block th:replace="~{fragments/pages/register :: register}"></th:block>
+<th:block th:replace="~{fragments/pages/community :: community}"></th:block>
+<th:block th:replace="~{fragments/pages/admin :: admin}"></th:block>
+<th:block th:replace="~{fragments/pages/calendar :: calendar}"></th:block>
+<th:block th:replace="~{fragments/pages/mypage :: mypage}"></th:block>
+<th:block th:replace="~{fragments/pages/roadmap :: roadmap}"></th:block>
+<th:block th:replace="~{fragments/pages/welfare :: welfare}"></th:block>
+<th:block th:replace="~{fragments/pages/extras :: extras}"></th:block>
+<th:block th:replace="~{fragments/ui/drawer :: drawer}"></th:block>
+
+<script th:src="@{/js/api.js}"></script>
+<script th:src="@{/js/app.js}"></script>
+<script th:src="@{/js/api-bridge.js}"></script>
+</body>
+</html>

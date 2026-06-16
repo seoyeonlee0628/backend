@@ -1,0 +1,10 @@
+target/
+.git/
+*.log
+ml_model/__pycache__/
+ml_model/server_*.log
+ml_model/server.log
+.env
+.idea/
+*.iml
+node_modules/

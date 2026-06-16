@@ -1,0 +1,28 @@
+서비스 목록 초기 로딩 중...
+서비스 캐시 [||]: 500개
+INFO:     127.0.0.1:55285 - "GET /health HTTP/1.1" 200 OK
+서비스 캐시 [|004|]: 500개
+INFO:     127.0.0.1:63543 - "POST /predict HTTP/1.1" 200 OK
+서비스 캐시 [경기도|004|]: 183개
+지역 필터(경기): 50개 남음
+INFO:     127.0.0.1:50777 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50793 - "POST /roadmap HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50794 - "POST /roadmap HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58694 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58694 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58694 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58694 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58694 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58694 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58694 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58694 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58694 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58694 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58694 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58707 - "POST /roadmap HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58735 - "POST /roadmap HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63702 - "POST /roadmap HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64000 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57300 - "POST /predict HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57302 - "POST /roadmap HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57304 - "POST /roadmap HTTP/1.1" 200 OK

@@ -1,0 +1,46 @@
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/welfare_check?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&createDatabaseIfNotExist=true}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:1234}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    cache: false
+    encoding: UTF-8
+
+server:
+  port: ${PORT:8080}
+
+gemini:
+  api-key: ${GEMINI_API_KEY}
+  api-url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+  fallback-url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent
+  fallback2-url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent
+
+welfareapi:
+  central-key: ${WELFARE_API_KEY}
+  local-key: ${WELFARE_API_KEY}
+
+admin:
+  initial-password: ${ADMIN_INITIAL_PASSWORD:changeme!}
+
+apis:
+  worknet-key: ${WORKNET_API_KEY:}
+  hrdnet-key: ${HRDNET_API_KEY:}
+
+logging:
+  level:
+    com.welfare: DEBUG
+    org.springframework.security: WARN

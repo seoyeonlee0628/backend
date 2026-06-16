@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="register" id="page-register" class="page pt-16 min-h-screen">
+  <div class="w-full max-w-md mx-4 py-12">
+    <div class="text-center mb-10">
+      <a href="#" onclick="goPage('home')" class="inline-flex items-center gap-3 mb-6 cursor-pointer">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-hover flex items-center justify-center shadow-lg shadow-primary/20">
+          <svg class="w-6 h-6 text-background" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        </div>
+        <span class="text-2xl font-bold">복지<span class="text-primary">체크</span></span>
+      </a>
+      <h1 class="text-2xl font-extrabold mb-2">회원가입</h1>
+      <p class="text-sm text-muted-foreground">복지체크와 함께 나에게 맞는 혜택을 찾아보세요</p>
+    </div>
+
+    <div class="bg-card border border-border rounded-2xl p-8 space-y-4">
+      <div>
+        <label class="text-xs text-muted-foreground mb-1.5 block font-medium">아이디 <span class="text-destructive">*</span></label>
+        <div class="flex gap-2">
+          <input id="reg-id" type="text" placeholder="영문/숫자 4-12자"
+            class="flex-1 bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
+          <button onclick="checkDuplicate('id')" class="px-4 py-3 bg-muted hover:bg-muted/70 text-sm rounded-xl transition-colors whitespace-nowrap font-medium">중복확인</button>
+        </div>
+        <p id="reg-id-msg" class="text-xs mt-1 hidden"></p>
+      </div>
+      <div>
+        <label class="text-xs text-muted-foreground mb-1.5 block font-medium">닉네임 <span class="text-destructive">*</span></label>
+        <div class="flex gap-2">
+          <input id="reg-nick" type="text" placeholder="닉네임 2-10자"
+            class="flex-1 bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
+          <button onclick="checkDuplicate('nick')" class="px-4 py-3 bg-muted hover:bg-muted/70 text-sm rounded-xl transition-colors whitespace-nowrap font-medium">중복확인</button>
+        </div>
+        <p id="reg-nick-msg" class="text-xs mt-1 hidden"></p>
+      </div>
+      <div>
+        <label class="text-xs text-muted-foreground mb-1.5 block font-medium">이메일 <span class="text-destructive">*</span></label>
+        <div class="flex gap-2">
+          <input id="reg-email" type="email" placeholder="example@email.com"
+            class="flex-1 bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
+          <button onclick="checkDuplicate('email')" class="px-4 py-3 bg-muted hover:bg-muted/70 text-sm rounded-xl transition-colors whitespace-nowrap font-medium">중복확인</button>
+        </div>
+        <p id="reg-email-msg" class="text-xs mt-1 hidden"></p>
+      </div>
+      <div>
+        <label class="text-xs text-muted-foreground mb-1.5 block font-medium">비밀번호 <span class="text-destructive">*</span></label>
+        <input id="reg-pw" type="password" placeholder="4자 이상"
+          class="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
+      </div>
+      <div>
+        <label class="text-xs text-muted-foreground mb-1.5 block font-medium">비밀번호 확인 <span class="text-destructive">*</span></label>
+        <input id="reg-pw2" type="password" placeholder="비밀번호 재입력"
+          class="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+          onkeydown="if(event.key==='Enter')doRegister()">
+      </div>
+      <div id="reg-err" class="hidden text-xs text-destructive bg-destructive/10 rounded-lg px-3 py-2"></div>
+      <button onclick="doRegister()" class="w-full py-3.5 bg-gradient-to-r from-primary to-cyan-400 text-background font-bold rounded-xl text-sm hover:shadow-lg hover:shadow-primary/30 transition-all mt-2">
+        가입하기
+      </button>
+    </div>
+
+    <p class="text-center text-sm text-muted-foreground mt-6">
+      이미 계정이 있으신가요?
+      <button onclick="goPage('home');openModal('modal-login')" class="text-primary hover:underline font-medium ml-1">로그인</button>
+    </p>
+    <p class="text-center text-xs text-muted-foreground/40 mt-3">
+      가입하면 복지체크 이용약관 및 개인정보처리방침에 동의하는 것으로 간주됩니다
+    </p>
+  </div>
+</div>
+</body>
+</html>

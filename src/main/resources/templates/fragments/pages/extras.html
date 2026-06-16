@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="extras">
+
+<style>
+.page { display:none; }
+.page.active { display:block; }
+
+.interview-card { background:var(--color-card,#16161e); border:1px solid #27272a; border-radius:16px; padding:20px; margin-bottom:12px; }
+.interview-card:hover { border-color:rgba(6,182,212,0.4); }
+.interview-q { font-size:14px; font-weight:600; margin-bottom:8px; color:#fafafa; }
+.interview-a { font-size:12px; color:#a1a1aa; line-height:1.6; display:none; }
+.interview-a.open { display:block; }
+.interview-tag { font-size:10px; padding:2px 8px; border-radius:20px; border:1px solid #27272a; color:#a1a1aa; }
+
+.region-btn { padding:8px 16px; border-radius:10px; border:1px solid #27272a; font-size:13px; cursor:pointer; background:transparent; color:#a1a1aa; transition:all .2s; }
+.region-btn.active { border-color:rgba(6,182,212,0.5); background:rgba(6,182,212,0.1); color:#06b6d4; }
+.region-benefit { background:#16161e; border:1px solid #27272a; border-radius:12px; padding:16px; margin-bottom:10px; }
+
+.tracker-step { display:flex; align-items:center; gap:12px; padding:14px; border-radius:12px; margin-bottom:8px; border:1px solid #27272a; }
+.tracker-dot { width:32px; height:32px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; }
+.tracker-step.done .tracker-dot { background:rgba(6,182,212,0.2); color:#06b6d4; border:2px solid rgba(6,182,212,0.5); }
+.tracker-step.current .tracker-dot { background:rgba(6,182,212,0.3); color:#06b6d4; border:2px solid #06b6d4; animation:pulse 2s infinite; }
+.tracker-step.pending .tracker-dot { background:#1e1e2e; color:#a1a1aa; border:2px solid #27272a; }
+
+.chat-bubble { max-width:80%; padding:12px 16px; border-radius:16px; font-size:13px; line-height:1.6; margin-bottom:8px; }
+.chat-bubble.ai { background:#16161e; border:1px solid #27272a; color:#fafafa; align-self:flex-start; border-bottom-left-radius:4px; }
+.chat-bubble.user { background:rgba(6,182,212,0.15); border:1px solid rgba(6,182,212,0.3); color:#fafafa; align-self:flex-end; border-bottom-right-radius:4px; }
+.chat-typing { display:flex; gap:4px; align-items:center; padding:12px 16px; }
+.chat-typing span { width:6px; height:6px; border-radius:50%; background:#06b6d4; animation:typing 1.2s infinite; }
+.chat-typing span:nth-child(2) { animation-delay:.2s; }
+.chat-typing span:nth-child(3) { animation-delay:.4s; }
+@keyframes typing { 0%,60%,100%{transform:translateY(0);opacity:.4} 30%{transform:translateY(-6px);opacity:1} }
+
+.report-stat { background:#16161e; border:1px solid #27272a; border-radius:14px; padding:20px; text-align:center; }
+.report-stat .num { font-size:28px; font-weight:800; color:#06b6d4; }
+.report-bar { height:8px; background:#27272a; border-radius:4px; overflow:hidden; margin-top:8px; }
+.report-bar-fill { height:100%; background:linear-gradient(to right,#06b6d4,#22d3ee); border-radius:4px; transition:width 1s ease; }
+</style>
+
+<!-- 면접 준비 -->
+<div id="page-interview" class="page pt-16 min-h-screen">
+  <div class="max-w-3xl mx-auto px-6 py-10">
+    <div class="mb-8">
+      <h1 class="text-2xl font-bold mb-2">면접 준비</h1>
+      <p class="text-muted-foreground text-sm">직군별 자주 나오는 질문과 체크리스트</p>
+    </div>
+    <div class="flex gap-2 flex-wrap mb-6">
+      <button onclick="loadInterviewQ('개발자')" id="iq-tab-개발자" class="region-btn active">💻 개발자</button>
+      <button onclick="loadInterviewQ('디자이너')" id="iq-tab-디자이너" class="region-btn">🎨 디자이너</button>
+      <button onclick="loadInterviewQ('마케터')" id="iq-tab-마케터" class="region-btn">📣 마케터</button>
+      <button onclick="loadInterviewQ('공무원')" id="iq-tab-공무원" class="region-btn">🏛️ 공무원</button>
+    </div>
+    <div class="bg-card border border-border rounded-2xl p-5 mb-6">
+      <div class="font-semibold text-sm mb-4">📋 면접 전 체크리스트</div>
+      <div id="interview-checklist" class="space-y-2"></div>
+    </div>
+    <div class="font-semibold text-sm mb-3">💬 자주 나오는 질문</div>
+    <div id="interview-questions" class="space-y-2"></div>
+  </div>
+</div>
+
+<!-- 지역별 혜택 -->
+<div id="page-region" class="page pt-16 min-h-screen">
+  <div class="max-w-3xl mx-auto px-6 py-10">
+    <div class="mb-8">
+      <h1 class="text-2xl font-bold mb-2">지역별 혜택</h1>
+      <p class="text-muted-foreground text-sm">내 지역에 맞는 추가 혜택을 찾아보세요</p>
+    </div>
+    <div class="flex gap-2 flex-wrap mb-6">
+      <button onclick="loadRegion('서울')" id="rgn-서울" class="region-btn active">서울</button>
+      <button onclick="loadRegion('경기')" id="rgn-경기" class="region-btn">경기</button>
+      <button onclick="loadRegion('부산')" id="rgn-부산" class="region-btn">부산</button>
+      <button onclick="loadRegion('인천')" id="rgn-인천" class="region-btn">인천</button>
+      <button onclick="loadRegion('대구')" id="rgn-대구" class="region-btn">대구</button>
+      <button onclick="loadRegion('광주')" id="rgn-광주" class="region-btn">광주</button>
+      <button onclick="loadRegion('대전')" id="rgn-대전" class="region-btn">대전</button>
+    </div>
+    <div id="region-list" class="space-y-3"></div>
+  </div>
+</div>
+
+<!-- 신청 트래커 -->
+<div id="page-tracker" class="page pt-16 min-h-screen">
+  <div class="max-w-3xl mx-auto px-6 py-10">
+    <div class="mb-8">
+      <h1 class="text-2xl font-bold mb-2">신청 진행 상황</h1>
+      <p class="text-muted-foreground text-sm">혜택 신청 단계를 트래킹해요</p>
+    </div>
+    <div id="tracker-list" class="space-y-4"></div>
+    <button onclick="addTrackerItem()" class="mt-4 w-full py-3 border border-dashed border-border rounded-xl text-sm text-muted-foreground hover:border-primary/40 hover:text-primary transition-all">+ 혜택 추가</button>
+  </div>
+</div>
+
+<!-- 복지 챗봇 -->
+<div id="page-chatbot" class="page pt-16 min-h-screen">
+  <div class="max-w-2xl mx-auto px-6 py-10 flex flex-col" style="height:calc(100vh - 64px);">
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold mb-1">복지 챗봇</h1>
+      <p class="text-muted-foreground text-sm">복지 관련 무엇이든 물어보세요</p>
+    </div>
+    <div id="chat-messages" class="flex-1 overflow-y-auto flex flex-col gap-2 mb-4 pr-1" style="min-height:0;"></div>
+    <div class="flex gap-2 items-center border border-border rounded-2xl px-4 py-3 bg-card">
+      <input id="chat-input" type="text" placeholder="질문을 입력하세요..." class="flex-1 bg-transparent text-sm focus:outline-none" onkeydown="if(event.key==='Enter') sendChat()">
+      <button onclick="sendChat()" class="px-4 py-2 bg-primary text-background text-xs font-bold rounded-xl hover:opacity-90 transition-all">전송</button>
+    </div>
+  </div>
+</div>
+
+<!-- 월별 리포트 -->
+<div id="page-report" class="page pt-16 min-h-screen">
+  <div class="max-w-3xl mx-auto px-6 py-10">
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-2xl font-bold mb-1">월별 리포트</h1>
+        <p class="text-muted-foreground text-sm" id="report-month"></p>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="changeReportMonth(-1)" class="w-8 h-8 border border-border rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground">‹</button>
+        <button onclick="changeReportMonth(1)" class="w-8 h-8 border border-border rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground">›</button>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+      <div class="report-stat"><div class="num" id="rpt-wish">0</div><div class="text-xs text-muted-foreground mt-1">찜한 혜택</div></div>
+      <div class="report-stat"><div class="num" id="rpt-diag">0</div><div class="text-xs text-muted-foreground mt-1">진단 횟수</div></div>
+      <div class="report-stat"><div class="num" id="rpt-post">0</div><div class="text-xs text-muted-foreground mt-1">게시글</div></div>
+      <div class="report-stat"><div class="num" id="rpt-amt">0</div><div class="text-xs text-muted-foreground mt-1">예상 수혜(만원)</div></div>
+    </div>
+    <div class="bg-card border border-border rounded-2xl p-6 mb-6">
+      <div class="font-semibold text-sm mb-4">이번 달 활동</div>
+      <div id="report-bars" class="space-y-3"></div>
+    </div>
+    <div class="bg-card border border-border rounded-2xl p-6">
+      <div class="font-semibold text-sm mb-4">🎯 이번 달 추천 행동</div>
+      <div id="report-tips" class="space-y-2"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 스크랩북 -->
+<div id="page-scrapbook" class="page pt-16 min-h-screen">
+  <div class="max-w-3xl mx-auto px-6 py-10">
+    <div class="flex items-center justify-between mb-8">
+      <div><h1 class="text-2xl font-bold mb-1">스크랩북</h1><p class="text-muted-foreground text-sm">유용한 링크와 정보를 저장하세요</p></div>
+      <button onclick="openScrapAdd()" class="px-4 py-2 bg-primary text-background text-sm font-bold rounded-xl hover:opacity-90 transition-all">+ 추가</button>
+    </div>
+    <div id="scrap-list" class="space-y-3"></div>
+    <div id="scrap-empty" class="text-center py-16 text-muted-foreground text-sm">저장된 스크랩이 없어요<br><span class="text-xs">링크나 메모를 추가해보세요</span></div>
+  </div>
+  <div id="scrap-modal" style="display:none;position:fixed;inset:0;z-index:300;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);">
+    <div style="background:#16161e;border:1px solid #27272a;border-radius:20px;width:min(440px,90vw);padding:28px;">
+      <div class="font-bold mb-5">스크랩 추가</div>
+      <input id="scrap-title" placeholder="제목" style="width:100%;background:#0a0a0f;border:1px solid #27272a;border-radius:10px;padding:10px 14px;font-size:13px;color:#fafafa;margin-bottom:10px;box-sizing:border-box;outline:none;">
+      <input id="scrap-url" placeholder="URL (선택)" style="width:100%;background:#0a0a0f;border:1px solid #27272a;border-radius:10px;padding:10px 14px;font-size:13px;color:#fafafa;margin-bottom:10px;box-sizing:border-box;outline:none;">
+      <textarea id="scrap-memo" placeholder="메모 (선택)" style="width:100%;background:#0a0a0f;border:1px solid #27272a;border-radius:10px;padding:10px 14px;font-size:13px;color:#fafafa;margin-bottom:16px;box-sizing:border-box;outline:none;resize:none;height:80px;"></textarea>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button onclick="closeScrapAdd()" style="padding:8px 16px;border:1px solid #27272a;border-radius:10px;background:none;color:#a1a1aa;cursor:pointer;font-size:13px;">취소</button>
+        <button onclick="saveScrap()" style="padding:8px 16px;background:#06b6d4;border:none;border-radius:10px;color:#0a0a0f;font-weight:700;cursor:pointer;font-size:13px;">저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 알림 설정 -->
+<div id="page-notifications" class="page pt-16 min-h-screen">
+  <div class="max-w-2xl mx-auto px-6 py-10">
+    <div class="mb-8"><h1 class="text-2xl font-bold mb-1">알림 설정</h1><p class="text-muted-foreground text-sm">혜택 마감 전 알림을 받아보세요</p></div>
+    <div class="bg-card border border-border rounded-2xl p-6 mb-4">
+      <div class="font-semibold text-sm mb-4">마감 알림 기준</div>
+      <div class="space-y-3" id="notif-options"></div>
+    </div>
+    <div class="bg-card border border-border rounded-2xl p-6 mb-4">
+      <div class="font-semibold text-sm mb-4">알림 방식</div>
+      <div class="space-y-3">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;"><input type="checkbox" id="notif-browser" checked style="accent-color:#06b6d4;"> <span class="text-sm">브라우저 알림</span></label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;"><input type="checkbox" id="notif-banner" checked style="accent-color:#06b6d4;"> <span class="text-sm">상단 배너 알림</span></label>
+      </div>
+    </div>
+    <div class="bg-card border border-border rounded-2xl p-6">
+      <div class="font-semibold text-sm mb-4">찜한 혜택 알림 목록</div>
+      <div id="notif-wish-list" class="space-y-2"></div>
+    </div>
+    <button onclick="saveNotifSettings()" class="mt-5 w-full py-3 bg-primary text-background font-bold rounded-xl hover:opacity-90 transition-all text-sm">설정 저장</button>
+  </div>
+</div>
+
+<!-- 같은 상황 친구 찾기 -->
+<div id="page-matching" class="page pt-16 min-h-screen">
+  <div class="max-w-3xl mx-auto px-6 py-10">
+    <div class="mb-8"><h1 class="text-2xl font-bold mb-1">같은 상황 친구 찾기</h1><p class="text-muted-foreground text-sm">비슷한 상황의 취준생을 만나보세요</p></div>
+    <div class="bg-card border border-border rounded-2xl p-6 mb-6">
+      <div class="font-semibold text-sm mb-4">내 상황 선택</div>
+      <div class="flex flex-wrap gap-2 mb-4" id="match-tags"></div>
+      <button onclick="findMatch()" class="w-full py-3 bg-primary text-background font-bold rounded-xl hover:opacity-90 transition-all text-sm">매칭 찾기</button>
+    </div>
+    <div id="match-results" class="space-y-3"></div>
+  </div>
+</div>
+
+<!-- 혜택 계산기 -->
+<div id="page-calculator" class="page pt-16 min-h-screen">
+  <div class="max-w-2xl mx-auto px-6 py-10">
+    <div class="mb-8"><h1 class="text-2xl font-bold mb-1">혜택 계산기</h1><p class="text-muted-foreground text-sm">내 조건을 입력하면 예상 수혜액을 계산해드려요</p></div>
+    <div class="bg-card border border-border rounded-2xl p-6 mb-6 space-y-5">
+      <div>
+        <label class="text-xs text-muted-foreground font-medium block mb-2">나이</label>
+        <input id="calc-age" type="number" placeholder="예) 27" min="15" max="45" style="width:100%;background:#0a0a0f;border:1px solid #27272a;border-radius:10px;padding:10px 14px;font-size:13px;color:#fafafa;box-sizing:border-box;outline:none;">
+      </div>
+      <div>
+        <label class="text-xs text-muted-foreground font-medium block mb-2">취업 상태</label>
+        <div class="flex flex-wrap gap-2" id="calc-status"></div>
+      </div>
+      <div>
+        <label class="text-xs text-muted-foreground font-medium block mb-2">거주 형태</label>
+        <div class="flex flex-wrap gap-2" id="calc-housing"></div>
+      </div>
+      <div>
+        <label class="text-xs text-muted-foreground font-medium block mb-2">월 소득 (만원)</label>
+        <input id="calc-income" type="number" placeholder="예) 0 (없으면 0)" min="0" style="width:100%;background:#0a0a0f;border:1px solid #27272a;border-radius:10px;padding:10px 14px;font-size:13px;color:#fafafa;box-sizing:border-box;outline:none;">
+      </div>
+      <button onclick="calcBenefit()" class="w-full py-3 bg-primary text-background font-bold rounded-xl hover:opacity-90 transition-all text-sm">계산하기</button>
+    </div>
+    <div id="calc-result" class="hidden bg-card border border-border rounded-2xl p-6">
+      <div class="text-xs text-muted-foreground uppercase tracking-widest mb-3">예상 연간 수혜액</div>
+      <div id="calc-total" class="text-4xl font-extrabold text-primary mb-6"></div>
+      <div id="calc-items" class="space-y-3"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 서류 체크리스트 -->
+<div id="page-documents" class="page pt-16 min-h-screen">
+  <div class="max-w-3xl mx-auto px-6 py-10">
+    <div class="mb-8"><h1 class="text-2xl font-bold mb-1">서류 체크리스트</h1><p class="text-muted-foreground text-sm">자소서·이력서 필수 항목을 체크하세요</p></div>
+    <div class="flex gap-2 flex-wrap mb-6" id="doc-tabs"></div>
+    <div id="doc-content" class="space-y-4"></div>
+  </div>
+</div>
+
+</th:block>
+</body>
+</html>

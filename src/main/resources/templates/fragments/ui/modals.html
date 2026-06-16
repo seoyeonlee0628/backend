@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="modals">
+
+<!-- ===== 로그인 모달 ===== -->
+<div id="modal-login" class="modal-overlay" onclick="handleOverlayClick(event,'modal-login')">
+  <div class="modal-box w-full max-w-sm mx-4 bg-card border border-border rounded-2xl p-8">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-bold">로그인</h2>
+      <button onclick="closeModal('modal-login')" class="text-muted-foreground hover:text-foreground">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="space-y-4">
+      <div>
+        <label class="text-xs text-muted-foreground mb-1.5 block">아이디</label>
+        <input id="login-id" type="text" placeholder="아이디 입력" class="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div>
+        <label class="text-xs text-muted-foreground mb-1.5 block">비밀번호</label>
+        <input id="login-pw" type="password" placeholder="비밀번호 입력" class="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div id="login-err" class="hidden text-xs text-destructive bg-destructive/10 rounded-lg px-3 py-2"></div>
+      <button onclick="doLogin()" class="w-full py-3 bg-gradient-to-r from-primary to-cyan-400 text-background font-semibold rounded-xl text-sm hover:shadow-lg hover:shadow-primary/30 transition-all">로그인</button>
+    </div>
+    <p class="text-center text-xs text-muted-foreground mt-5">계정이 없으신가요? <button onclick="closeModal('modal-login');goPage('register')" class="text-primary hover:underline">회원가입</button></p>
+  </div>
+</div>
+
+<!-- ===== 토스트 ===== -->
+<div id="toast" class="fixed bottom-6 right-6 z-[999] hidden">
+  <div class="bg-card border border-border rounded-xl px-4 py-3 text-sm shadow-xl slide-up flex items-center gap-3 min-w-[200px]">
+    <span id="toast-icon"></span>
+    <span id="toast-msg"></span>
+  </div>
+</div>
+
+<!-- ===== 타임라인 상세 패널 ===== -->
+<div id="tl-overlay" onclick="closeTlPanel()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);z-index:199;"></div>
+<div id="tl-panel" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:200;background:#16161e;border:1px solid #27272a;border-radius:20px;width:min(680px,90vw);max-height:80vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,0.7);">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid #27272a;position:sticky;top:0;background:var(--color-card,#16161e);z-index:1;">
+    <div id="tl-panel-header" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;"></div>
+    <button onclick="closeTlPanel()" style="background:none;border:none;cursor:pointer;color:#a1a1aa;padding:4px;flex-shrink:0;"><svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+  </div>
+  <div id="tl-panel-body" style="padding:20px 24px;"></div>
+</div>
+
+<!-- ===== 혜택 상세보기 모달 ===== -->
+<div id="benefit-detail-overlay" onclick="closeBenefitDetail()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);z-index:400;"></div>
+<div id="benefit-detail-panel" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-52%) scale(0.95);z-index:401;background:#FFF9F4;border-radius:24px;width:min(380px,92vw);box-shadow:0 32px 80px rgba(0,0,0,0.35);overflow:hidden;transition:transform .22s cubic-bezier(0.34,1.56,0.64,1),opacity .18s ease;opacity:0;">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 18px 0;">
+    <span id="bd-category" style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;background:rgba(6,182,212,0.12);color:#0891b2;"></span>
+    <button onclick="closeBenefitDetail()" style="background:none;border:none;cursor:pointer;color:#a1a1aa;font-size:20px;line-height:1;padding:2px 6px;">✕</button>
+  </div>
+  <div style="padding:12px 18px 16px;">
+    <h2 id="bd-title" style="font-size:20px;font-weight:800;color:#0f172a;margin:0 0 7px;line-height:1.3;letter-spacing:-0.02em;"></h2>
+    <p id="bd-desc" style="font-size:13px;color:#64748b;line-height:1.65;margin:0;"></p>
+  </div>
+  <div style="margin:0 18px 16px;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e2e8f0;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid #e2e8f0;">
+      <span style="font-size:13px;color:#64748b;">지원 내용</span>
+      <span id="bd-amt" style="font-size:13px;font-weight:600;color:#0f172a;text-align:right;max-width:58%;"></span>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid #e2e8f0;">
+      <span style="font-size:13px;color:#64748b;">지원 기간</span>
+      <span id="bd-period" style="font-size:13px;font-weight:600;color:#0f172a;text-align:right;max-width:58%;"></span>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid #e2e8f0;">
+      <span style="font-size:13px;color:#64748b;">신청 기한</span>
+      <span id="bd-deadline" style="font-size:13px;font-weight:600;color:#0f172a;text-align:right;max-width:58%;"></span>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;">
+      <span style="font-size:13px;color:#64748b;">담당 기관</span>
+      <span id="bd-org" style="font-size:13px;font-weight:600;color:#0f172a;text-align:right;max-width:58%;"></span>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;padding:0 18px 20px;">
+    <button id="bd-wish-btn" onclick="bdToggleWish()" style="width:44px;height:44px;flex-shrink:0;border-radius:12px;border:1.5px solid #e2e8f0;background:#ffffff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;">
+      <svg id="bd-heart" width="18" height="18" fill="none" stroke="#94a3b8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+    </button>
+    <a id="bd-link" href="#" target="_blank" rel="noopener noreferrer"
+       style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:13px 0;background:#06b6d4;color:#ffffff;font-size:14px;font-weight:700;border-radius:12px;text-decoration:none;transition:background .2s;"
+       onmouseover="this.style.background='#0891b2'" onmouseout="this.style.background='#06b6d4'">
+      신청하러 가기
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+    </a>
+  </div>
+</div>
+
+<!-- ===== 온보딩 가이드 모달 ===== -->
+<div id="onboarding-modal" style="display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);">
+  <div style="background:#16161e;border:1px solid #27272a;border-radius:20px;width:min(440px,90vw);padding:32px;position:relative;box-shadow:0 25px 60px rgba(0,0,0,0.7);">
+    <button onclick="closeOnboarding()" style="position:absolute;top:16px;right:16px;background:none;border:none;cursor:pointer;color:#a1a1aa;font-size:20px;line-height:1;">✕</button>
+    <div style="text-align:center;margin-bottom:24px;">
+      <div id="ob-img" style="font-size:56px;margin-bottom:16px;"></div>
+      <h3 id="ob-title" style="font-size:18px;font-weight:700;color:#fafafa;margin-bottom:12px;line-height:1.4;"></h3>
+      <p id="ob-desc" style="font-size:13px;color:#a1a1aa;line-height:1.7;"></p>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:24px;">
+      <div class="ob-dot" style="height:6px;border-radius:3px;transition:all .3s;background:#06b6d4;width:20px;"></div>
+      <div class="ob-dot" style="height:6px;border-radius:3px;transition:all .3s;background:#27272a;width:6px;"></div>
+      <div class="ob-dot" style="height:6px;border-radius:3px;transition:all .3s;background:#27272a;width:6px;"></div>
+      <div class="ob-dot" style="height:6px;border-radius:3px;transition:all .3s;background:#27272a;width:6px;"></div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <button id="ob-prev" onclick="obPrev()" style="padding:8px 16px;background:none;border:none;cursor:pointer;color:#a1a1aa;font-size:13px;">← 이전</button>
+      <span id="ob-counter" style="font-size:11px;color:#a1a1aa;"></span>
+      <button id="ob-next" onclick="obNext()" style="padding:10px 20px;background:linear-gradient(to right,#06b6d4,#22d3ee);border:none;border-radius:12px;cursor:pointer;color:#0a0a0f;font-weight:700;font-size:13px;">다음 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 내가 쓴 글 모달 ===== -->
+<div id="my-posts-modal" style="display:none;position:fixed;inset:0;z-index:200;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);">
+  <div style="background:#16161e;border:1px solid #27272a;border-radius:20px;width:min(520px,90vw);max-height:70vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,0.7);">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid #27272a;position:sticky;top:0;background:#16161e;">
+      <span style="font-weight:700;">내가 쓴 글</span>
+      <button onclick="closeMyPosts()" style="background:none;border:none;cursor:pointer;color:#a1a1aa;font-size:18px;">✕</button>
+    </div>
+    <div id="my-posts-list" style="padding:8px 24px 24px;"></div>
+  </div>
+</div>
+
+<!-- ===== 출석 보상 모달 ===== -->
+<div id="modal-checkin" class="modal-overlay" onclick="handleOverlayClick(event,'modal-checkin')" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);z-index:500;align-items:center;justify-content:center;">
+  <div class="modal-box w-full max-w-sm mx-4 bg-card border border-border rounded-2xl p-8 text-center" style="position:relative;">
+    <div id="checkin-emoji" style="font-size:56px;margin-bottom:12px;">🎉</div>
+    <h2 class="text-xl font-bold mb-1">출석 완료!</h2>
+    <div id="checkin-streak" class="text-sm text-muted-foreground mb-4"></div>
+    <div class="bg-primary/10 border border-primary/20 rounded-2xl p-4 mb-4">
+      <div class="text-3xl font-extrabold text-primary" id="checkin-points"></div>
+      <div class="text-xs text-muted-foreground mt-1">포인트 획득</div>
+    </div>
+    <div id="checkin-bonus" class="text-xs text-warning font-semibold mb-3 hidden"></div>
+    <div id="checkin-badges" class="flex flex-wrap justify-center gap-2 mb-5"></div>
+    <div class="text-xs text-muted-foreground mb-5">누적 포인트: <span id="checkin-total" class="font-bold text-foreground"></span>P</div>
+    <button onclick="closeModal('modal-checkin')" class="w-full py-3 bg-gradient-to-r from-primary to-cyan-400 text-background font-bold rounded-xl text-sm">확인</button>
+  </div>
+</div>
+
+<!-- ===== 뱃지 샵 모달 ===== -->
+<div id="modal-badge-shop" class="modal-overlay" onclick="handleOverlayClick(event,'modal-badge-shop')" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);z-index:500;align-items:center;justify-content:center;">
+  <div class="modal-box w-full max-w-md mx-4 bg-card border border-border rounded-2xl p-6 overflow-y-auto" style="max-height:90vh">
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h2 class="text-lg font-bold">뱃지 샵</h2>
+        <p class="text-xs text-muted-foreground mt-0.5">보유 포인트: <span id="shop-my-points" class="font-bold text-primary">0</span>P</p>
+      </div>
+      <button onclick="closeModal('modal-badge-shop')" class="text-muted-foreground hover:text-foreground">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <!-- 뱃지 -->
+    <p class="text-xs font-semibold text-muted-foreground mb-2">🏅 칭호 뱃지</p>
+    <div class="space-y-3" id="badge-shop-list">
+      <div class="flex items-center justify-between p-4 bg-background border border-border rounded-2xl">
+        <div class="flex items-center gap-3"><span class="text-2xl">💎</span><div><div class="font-semibold text-sm">복지마스터</div><div class="text-xs text-muted-foreground">복지 전문가의 증표</div></div></div>
+        <button onclick="buyBadge('복지마스터')" class="px-4 py-2 bg-primary/10 text-primary text-xs font-bold rounded-xl hover:bg-primary/20 transition-colors">100P</button>
+      </div>
+      <div class="flex items-center justify-between p-4 bg-background border border-border rounded-2xl">
+        <div class="flex items-center gap-3"><span class="text-2xl">🎯</span><div><div class="font-semibold text-sm">취준챔피언</div><div class="text-xs text-muted-foreground">끝까지 포기하지 않는 취준생</div></div></div>
+        <button onclick="buyBadge('취준챔피언')" class="px-4 py-2 bg-primary/10 text-primary text-xs font-bold rounded-xl hover:bg-primary/20 transition-colors">200P</button>
+      </div>
+    </div>
+    <!-- 특별 직군 로드맵 해금 -->
+    <p class="text-xs font-semibold text-muted-foreground mt-4 mb-2">🗺️ 특별 직군 로드맵 해금</p>
+    <div class="space-y-3" id="roadmap-shop-list">
+      <div class="flex items-center justify-between p-4 bg-background border border-border rounded-2xl">
+        <div class="flex items-center gap-3"><span class="text-2xl">💼</span><div><div class="font-semibold text-sm">프리랜서 로드맵</div><div class="text-xs text-muted-foreground">자유롭게 일하는 프리랜서 취업 로드맵</div></div></div>
+        <button id="shop-btn-freelancer" onclick="unlockRoadmap('프리랜서')" class="px-4 py-2 bg-purple-500/10 text-purple-400 text-xs font-bold rounded-xl hover:bg-purple-500/20 transition-colors">80P</button>
+      </div>
+      <div class="flex items-center justify-between p-4 bg-background border border-border rounded-2xl">
+        <div class="flex items-center gap-3"><span class="text-2xl">🎬</span><div><div class="font-semibold text-sm">유튜버 로드맵</div><div class="text-xs text-muted-foreground">크리에이터로 성장하는 로드맵</div></div></div>
+        <button id="shop-btn-youtuber" onclick="unlockRoadmap('유튜버')" class="px-4 py-2 bg-red-500/10 text-red-400 text-xs font-bold rounded-xl hover:bg-red-500/20 transition-colors">80P</button>
+      </div>
+    </div>
+    <!-- 닉네임 이모지 -->
+    <p class="text-xs font-semibold text-muted-foreground mt-4 mb-2">✨ 닉네임 이모지 (각 20P)</p>
+    <div class="grid grid-cols-4 gap-2" id="emoji-shop-list">
+      <button onclick="buyEmoji('💼')" class="flex flex-col items-center gap-1 p-3 bg-background border border-border rounded-xl hover:border-primary transition-colors"><span class="text-2xl">💼</span><span class="text-xs text-muted-foreground">20P</span></button>
+      <button onclick="buyEmoji('🚀')" class="flex flex-col items-center gap-1 p-3 bg-background border border-border rounded-xl hover:border-primary transition-colors"><span class="text-2xl">🚀</span><span class="text-xs text-muted-foreground">20P</span></button>
+      <button onclick="buyEmoji('✨')" class="flex flex-col items-center gap-1 p-3 bg-background border border-border rounded-xl hover:border-primary transition-colors"><span class="text-2xl">✨</span><span class="text-xs text-muted-foreground">20P</span></button>
+      <button onclick="buyEmoji('🔥')" class="flex flex-col items-center gap-1 p-3 bg-background border border-border rounded-xl hover:border-primary transition-colors"><span class="text-2xl">🔥</span><span class="text-xs text-muted-foreground">20P</span></button>
+      <button onclick="buyEmoji('⚡')" class="flex flex-col items-center gap-1 p-3 bg-background border border-border rounded-xl hover:border-primary transition-colors"><span class="text-2xl">⚡</span><span class="text-xs text-muted-foreground">20P</span></button>
+      <button onclick="buyEmoji('🎯')" class="flex flex-col items-center gap-1 p-3 bg-background border border-border rounded-xl hover:border-primary transition-colors"><span class="text-2xl">🎯</span><span class="text-xs text-muted-foreground">20P</span></button>
+      <button onclick="buyEmoji('🌱')" class="flex flex-col items-center gap-1 p-3 bg-background border border-border rounded-xl hover:border-primary transition-colors"><span class="text-2xl">🌱</span><span class="text-xs text-muted-foreground">20P</span></button>
+      <button onclick="buyEmoji('💎')" class="flex flex-col items-center gap-1 p-3 bg-background border border-border rounded-xl hover:border-primary transition-colors"><span class="text-2xl">💎</span><span class="text-xs text-muted-foreground">20P</span></button>
+    </div>
+    <div class="mt-4 p-3 bg-muted/30 rounded-xl text-xs text-muted-foreground text-center">
+      매일 출석하면 포인트를 얻을 수 있어요 · 3일 연속 +30P · 7일 연속 +100P
+    </div>
+  </div>
+</div>
+
+</th:block>
+</body>
+</html>

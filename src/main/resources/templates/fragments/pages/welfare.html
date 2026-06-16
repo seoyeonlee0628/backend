@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="welfare" id="page-welfare" class="page pt-16 min-h-screen">
+
+<style>
+#page-welfare .welfare-source-btn {
+  padding: 6px 18px; border-radius: 999px; font-size: 13px; cursor: pointer;
+  border: 1.5px solid hsl(var(--border)); background: transparent;
+  color: hsl(var(--muted-foreground)); transition: all .15s; font-weight: 500;
+}
+#page-welfare .welfare-source-btn.active {
+  background: hsl(var(--foreground)); border-color: hsl(var(--foreground));
+  color: hsl(var(--background)); font-weight: 600;
+}
+#page-welfare .welfare-cat-btn {
+  padding: 6px 14px; border-radius: 999px; font-size: 12px; cursor: pointer;
+  border: 1.5px solid hsl(var(--border)); background: transparent;
+  color: hsl(var(--muted-foreground)); transition: all .15s; white-space: nowrap; font-weight: 500;
+}
+#page-welfare .welfare-cat-btn.active {
+  background: hsl(var(--primary)); border-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground)); font-weight: 700;
+}
+#page-welfare .welfare-card {
+  transition: box-shadow .2s, transform .15s; cursor: pointer;
+}
+#page-welfare .welfare-card:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.09); }
+#page-welfare .line-clamp-2 {
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+/* 상세보기 사이드 패널 */
+#wd-side {
+  display: none;
+  position: sticky; top: 76px;
+  width: 320px; flex-shrink: 0;
+  background: #fff; color: #111;
+  border-radius: 20px; overflow: hidden;
+  height: calc(100vh - 96px); overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+  animation: wdSlide .2s ease;
+}
+#wd-side.open { display: block; }
+@keyframes wdSlide { from { opacity:0; transform:translateX(14px); } to { opacity:1; transform:translateX(0); } }
+#welfare-body { align-items: flex-start; }
+.wd-row {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 12px 16px; gap: 12px;
+}
+.wd-row + .wd-row { border-top: 1px solid #f0f0f0; }
+.welfare-card { cursor: pointer; }
+</style>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-8 py-10">
+    <!-- 헤더 -->
+    <div class="mb-8">
+      <h1 class="text-2xl sm:text-3xl font-extrabold mb-1">복지서비스 둘러보기</h1>
+      <p class="text-sm text-muted-foreground" id="welfare-count-text">공공데이터를 불러오는 중...</p>
+    </div>
+
+    <!-- 검색 -->
+    <div class="relative mb-5">
+      <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
+      </svg>
+      <input id="welfare-search" type="text" placeholder="복지서비스, 키워드를 검색해 보세요"
+        class="w-full bg-card border border-border rounded-2xl pl-11 pr-5 py-3.5 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+        oninput="filterWelfare()">
+    </div>
+
+    <!-- 출처 필터 -->
+    <div class="flex gap-2 mb-4">
+      <button class="welfare-source-btn active" data-source="전체"   onclick="setWelfareSource('전체')">전체</button>
+      <button class="welfare-source-btn"        data-source="중앙부처" onclick="setWelfareSource('중앙부처')">중앙부처</button>
+      <button class="welfare-source-btn"        data-source="지자체"  onclick="setWelfareSource('지자체')">지자체</button>
+    </div>
+
+    <!-- 분야 필터 -->
+    <div class="flex flex-wrap gap-2 mb-8">
+      <button class="welfare-cat-btn" data-cat="전체"             onclick="setWelfareCat('전체')">전체 분야</button>
+      <button class="welfare-cat-btn active" data-cat="청년"      onclick="setWelfareCat('청년')">🧑 청년</button>
+      <button class="welfare-cat-btn" data-cat="주거"             onclick="setWelfareCat('주거')">🏠 주거</button>
+      <button class="welfare-cat-btn" data-cat="취업일자리"       onclick="setWelfareCat('취업일자리')">💼 취업일자리</button>
+      <button class="welfare-cat-btn" data-cat="의료건강"         onclick="setWelfareCat('의료건강')">❤️ 의료건강</button>
+      <button class="welfare-cat-btn" data-cat="저소득"           onclick="setWelfareCat('저소득')">💰 저소득</button>
+      <button class="welfare-cat-btn" data-cat="자립"             onclick="setWelfareCat('자립')">🌱 자립</button>
+      <button class="welfare-cat-btn" data-cat="신혼부부"         onclick="setWelfareCat('신혼부부')">💑 신혼부부</button>
+      <button class="welfare-cat-btn" data-cat="한부모"           onclick="setWelfareCat('한부모')">👨‍👧 한부모</button>
+      <button class="welfare-cat-btn" data-cat="다자녀"           onclick="setWelfareCat('다자녀')">👨‍👩‍👧‍👦 다자녀</button>
+      <button class="welfare-cat-btn" data-cat="아동보육"         onclick="setWelfareCat('아동보육')">🍼 아동보육</button>
+      <button class="welfare-cat-btn" data-cat="청소년"           onclick="setWelfareCat('청소년')">📚 청소년</button>
+      <button class="welfare-cat-btn" data-cat="출산임신"         onclick="setWelfareCat('출산임신')">🤱 출산임신</button>
+      <button class="welfare-cat-btn" data-cat="노인"             onclick="setWelfareCat('노인')">👴 노인</button>
+      <button class="welfare-cat-btn" data-cat="장애인"           onclick="setWelfareCat('장애인')">♿ 장애인</button>
+      <button class="welfare-cat-btn" data-cat="보훈"             onclick="setWelfareCat('보훈')">🎖️ 보훈</button>
+    </div>
+
+    <!-- 콘텐츠: 그리드 + 사이드패널 -->
+    <div id="welfare-body" class="flex gap-5">
+
+      <!-- 오른쪽: 상세 패널 -->
+      <div id="wd-side" class="order-last">
+        <!-- 상단 -->
+        <div class="px-5 pt-5 pb-4">
+          <div class="flex items-center justify-between mb-3">
+            <span id="wd-cat-badge" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"></span>
+            <button onclick="closeWelfareDetail()" class="w-7 h-7 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-400">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <h2 id="wd-title" class="text-lg font-extrabold leading-snug mb-2" style="color:#111"></h2>
+          <p id="wd-desc" class="text-xs leading-relaxed" style="color:#777"></p>
+        </div>
+        <!-- 정보 -->
+        <div class="mx-4 mb-4 rounded-xl overflow-hidden" style="border:1.5px solid #f0f0f0">
+          <div class="wd-row">
+            <span class="text-xs flex-shrink-0" style="color:#999">지원 내용</span>
+            <span id="wd-amount" class="text-xs font-semibold text-right" style="color:#111"></span>
+          </div>
+          <div class="wd-row">
+            <span class="text-xs flex-shrink-0" style="color:#999">지원 기간</span>
+            <span id="wd-duration" class="text-xs font-semibold text-right" style="color:#111"></span>
+          </div>
+          <div class="wd-row">
+            <span class="text-xs flex-shrink-0" style="color:#999">신청 기한</span>
+            <span id="wd-period" class="text-xs font-semibold text-right" style="color:#111"></span>
+          </div>
+          <div class="wd-row">
+            <span class="text-xs flex-shrink-0" style="color:#999">담당 기관</span>
+            <span id="wd-org" class="text-xs font-semibold text-right" style="color:#111"></span>
+          </div>
+        </div>
+        <!-- 버튼 -->
+        <div class="px-4 pb-5 flex items-center gap-2">
+          <button id="wd-wish-btn" onclick="wdToggleWish()"
+            class="w-10 h-10 flex-shrink-0 rounded-xl flex items-center justify-center transition-all"
+            style="border:1.5px solid #e5e5e5">
+            <svg id="wd-heart" width="18" height="18" fill="none" stroke="#aaa" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+            </svg>
+          </button>
+          <a id="wd-link" href="#" target="_blank" rel="noopener noreferrer"
+            class="flex-1 flex items-center justify-center gap-1.5 py-3 font-bold rounded-xl text-sm transition-all"
+            style="background:#36A86A; color:#fff; text-decoration:none;"
+            onmouseover="this.style.background='#2a8a55'" onmouseout="this.style.background='#36A86A'">
+            신청하러 가기 →
+          </a>
+        </div>
+      </div>
+
+      <!-- 그리드 영역 -->
+      <div id="welfare-right" class="flex-1 min-w-0">
+        <!-- 로딩 -->
+        <div id="welfare-loading" class="text-center py-20">
+          <div class="w-10 h-10 rounded-full border-2 border-border border-t-primary animate-spin mx-auto mb-4"></div>
+          <p class="text-sm text-muted-foreground">공공데이터 불러오는 중...</p>
+        </div>
+        <!-- 카드 그리드 -->
+        <div id="welfare-grid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        <!-- 페이지네이션 -->
+        <div id="welfare-pagination" class="hidden flex items-center justify-center gap-2 mt-8 flex-wrap"></div>
+        <!-- 결과 없음 -->
+        <div id="welfare-empty" class="hidden text-center py-20 text-muted-foreground">
+          <div class="text-4xl mb-4">🔍</div>
+          <p class="font-medium">검색 결과가 없어요</p>
+          <p class="text-sm mt-1">다른 키워드나 조건으로 검색해보세요</p>
+        </div>
+        <!-- API 오류 -->
+        <div id="welfare-error" class="hidden text-center py-20 text-muted-foreground">
+          <div class="text-4xl mb-4">⚠️</div>
+          <p class="font-medium">데이터를 불러오지 못했어요</p>
+          <p class="text-sm mt-1 mb-4">API 키를 확인하거나 잠시 후 다시 시도해주세요</p>
+          <button onclick="loadWelfareData()" class="px-5 py-2.5 bg-primary text-background text-sm font-bold rounded-xl hover:opacity-90 transition-all">다시 시도</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function() {
+  var CAT_COLORS = {
+    '주거':'bg-amber-500/15 text-amber-600','취업일자리':'bg-teal-500/15 text-teal-600',
+    '자립':'bg-emerald-500/15 text-emerald-600','청년':'bg-cyan-500/15 text-cyan-600',
+    '의료건강':'bg-rose-500/15 text-rose-600','저소득':'bg-orange-500/15 text-orange-600',
+    '신혼부부':'bg-pink-500/15 text-pink-600','한부모':'bg-purple-500/15 text-purple-600',
+    '다자녀':'bg-blue-500/15 text-blue-600','아동보육':'bg-yellow-500/15 text-yellow-600',
+    '청소년':'bg-indigo-500/15 text-indigo-600','출산임신':'bg-pink-500/15 text-pink-600',
+    '노인':'bg-slate-500/15 text-slate-600','장애인':'bg-violet-500/15 text-violet-600',
+    '보훈':'bg-red-500/15 text-red-600',
+  };
+  var CAT_EMOJI = {
+    '주거':'🏠','취업일자리':'💼','자립':'🌱','청년':'🧑','의료건강':'❤️','저소득':'💰',
+    '신혼부부':'💑','한부모':'👨‍👧','다자녀':'👨‍👩‍👧‍👦','아동보육':'🍼','청소년':'📚',
+    '출산임신':'🤱','노인':'👴','장애인':'♿','보훈':'🎖️',
+  };
+
+  var ALL_DATA = [];
+  var PAGE_SIZE = 12;
+  var wState = { search:'', source:'전체', cat:'청년', page:1 };
+  var wCurrentItem = null;
+
+  function getWished() {
+    try { return JSON.parse(localStorage.getItem('welfareWish') || '[]'); } catch(e) { return []; }
+  }
+
+  // ── 카테고리 추론 (서버가 없을 때 클라이언트 보완) ───────────
+  function inferCat(item) {
+    if (item.category) return item.category;
+    var t = ((item.name||'') + ' ' + (item.summary||'') + ' ' + (item.lifeCycle||'')).toLowerCase();
+    if (/주거|월세|전세|주택|임대|거주/.test(t))              return '주거';
+    if (/취업|일자리|채용|고용|구직|근로|훈련|직업/.test(t))  return '취업일자리';
+    if (/건강|의료|보건|치료|병원|마음|심리/.test(t))          return '의료건강';
+    if (/저소득|기초수급|차상위|생계|긴급복지/.test(t))        return '저소득';
+    if (/출산|임신|산모|출생/.test(t))                         return '출산임신';
+    if (/아동|보육|어린이|유아/.test(t))                       return '아동보육';
+    if (/노인|어르신|고령|노령/.test(t))                       return '노인';
+    if (/장애/.test(t))                                        return '장애인';
+    if (/한부모/.test(t))                                      return '한부모';
+    if (/신혼/.test(t))                                        return '신혼부부';
+    if (/다자녀/.test(t))                                      return '다자녀';
+    if (/청소년/.test(t))                                      return '청소년';
+    if (/보훈|국가유공/.test(t))                               return '보훈';
+    if (/저축|자산|계좌|도약|내일/.test(t))                    return '자립';
+    return '청년';
+  }
+
+  // ── 공공데이터 로드 ────────────────────────────────────────────
+  window.loadWelfareData = function() {
+    showState('loading');
+    // 중앙부처 + 지자체 병렬 호출
+    Promise.all([
+      fetch('/api/welfare/central?page=1&size=50').then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; }),
+      fetch('/api/welfare/local?page=1&size=50').then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; })
+    ]).then(function(results) {
+      var central = Array.isArray(results[0]) ? results[0] : [];
+      var local   = Array.isArray(results[1]) ? results[1] : [];
+
+      // source 보완
+      central.forEach(function(d){ if (!d.source) d.source = '중앙부처'; });
+      local.forEach(function(d){   if (!d.source) d.source = '지자체'; });
+
+      var seen = {};
+      ALL_DATA = central.concat(local).filter(function(d) {
+        if (!d.id || seen[d.id]) return false;
+        seen[d.id] = true;
+        return true;
+      }).map(function(d) {
+        d.category = inferCat(d);
+        return d;
+      });
+
+      if (ALL_DATA.length === 0) { showState('error'); return; }
+      showState('grid');
+      wState.page = 1;
+      renderWelfareGrid();
+    }).catch(function(e) {
+      console.error('복지서비스 API 오류:', e);
+      showState('error');
+    });
+  };
+
+  function showState(state) {
+    document.getElementById('welfare-loading').classList.toggle('hidden', state !== 'loading');
+    document.getElementById('welfare-grid').classList.toggle('hidden', state !== 'grid');
+    document.getElementById('welfare-empty').classList.toggle('hidden', state !== 'empty');
+    document.getElementById('welfare-error').classList.toggle('hidden', state !== 'error');
+  }
+
+  // ── 필터링 & 렌더 ─────────────────────────────────────────────
+  function getFiltered() {
+    return ALL_DATA.filter(function(item) {
+      if (wState.source !== '전체' && item.source !== wState.source) return false;
+      if (wState.cat !== '전체' && item.category !== wState.cat) return false;
+      if (wState.search) {
+        var q = wState.search.toLowerCase();
+        var text = ((item.name||'') + ' ' + (item.summary||'') + ' ' + (item.category||'')).toLowerCase();
+        if (!text.includes(q)) return false;
+      }
+      return true;
+    });
+  }
+
+  function renderWelfareGrid() {
+    var items = getFiltered();
+    var wished = getWished();
+    var total = items.length;
+    var totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    if (wState.page > totalPages) wState.page = totalPages;
+    var start = (wState.page - 1) * PAGE_SIZE;
+    var pageItems = items.slice(start, start + PAGE_SIZE);
+
+    document.getElementById('welfare-count-text').textContent =
+      total + '개 중 ' + (start+1) + '–' + Math.min(start+PAGE_SIZE, total) + '번째 표시 중';
+
+    if (items.length === 0) { showState('empty'); document.getElementById('welfare-pagination').classList.add('hidden'); return; }
+    showState('grid');
+    renderPagination(totalPages);
+
+    var grid = document.getElementById('welfare-grid');
+    grid.innerHTML = pageItems.map(function(item) {
+      var cat  = item.category || '청년';
+      var cc   = CAT_COLORS[cat] || 'bg-muted/50 text-muted-foreground';
+      var em   = CAT_EMOJI[cat]  || '📋';
+      var name = item.name || '복지서비스';
+      var desc = (item.summary || '').substring(0, 60) + ((item.summary||'').length > 60 ? '...' : '');
+      var ministry = item.ministry || item.region || (item.source === '지자체' ? '지자체' : '보건복지부');
+      var wished_  = wished.includes(item.id);
+      var heartFill = wished_ ? '#f43f5e' : 'none';
+      var heartStroke = wished_ ? '#f43f5e' : 'currentColor';
+
+      return '<div class="welfare-card bg-card border border-border rounded-2xl p-5 flex flex-col gap-3" data-id="' + escHtml(item.id) + '" onclick="showWelfareDetail(\'' + escHtml(item.id) + '\')">'
+        + '<div class="flex items-center justify-between">'
+        +   '<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ' + cc + '">' + em + ' ' + cat + '</span>'
+        +   '<button onclick="event.stopPropagation();welfareToggleWish(\'' + escHtml(item.id) + '\')" id="wf-heart-' + escHtml(item.id) + '" class="w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-rose-500 transition-colors">'
+        +     '<svg width="18" height="18" fill="' + heartFill + '" stroke="' + heartStroke + '" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>'
+        +   '</button>'
+        + '</div>'
+        + '<h3 class="font-bold text-base leading-snug">' + escHtml(name) + '</h3>'
+        + '<p class="text-sm text-muted-foreground line-clamp-2 leading-relaxed">' + escHtml(desc) + '</p>'
+        + '<div class="flex flex-wrap gap-2">'
+        +   '<span class="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted/40 px-2.5 py-1.5 rounded-full"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>' + escHtml(item.supportCycle || '상시') + '</span>'
+        +   '<span class="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted/40 px-2.5 py-1.5 rounded-full"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>' + escHtml(item.source || '중앙부처') + '</span>'
+        + '</div>'
+        + '<div class="flex items-center justify-between mt-auto pt-3 border-t border-border">'
+        +   '<span class="text-xs text-muted-foreground truncate mr-2">' + escHtml(ministry) + '</span>'
+        +   '<button onclick="event.stopPropagation();showWelfareDetail(\'' + escHtml(item.id) + '\')" class="flex-shrink-0 px-4 py-2 bg-primary text-background text-xs font-bold rounded-xl hover:opacity-90 transition-all">자세히</button>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  // ── 상세보기 ───────────────────────────────────────────────────
+  window.showWelfareDetail = function(id) {
+    // 같은 카드 다시 누르면 닫기
+    if (wCurrentItem && wCurrentItem.id === id) {
+      closeWelfareDetail();
+      return;
+    }
+    var item = ALL_DATA.find(function(d){ return d.id === id; });
+    if (!item) return;
+    wCurrentItem = item;
+    var cat = item.category || '청년';
+    var cc  = CAT_COLORS[cat] || 'bg-muted/50 text-muted-foreground';
+    var em  = CAT_EMOJI[cat]  || '📋';
+
+    document.getElementById('wd-cat-badge').className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ' + cc;
+    document.getElementById('wd-cat-badge').textContent = em + ' ' + cat;
+    document.getElementById('wd-title').textContent    = item.name || '-';
+    document.getElementById('wd-desc').textContent     = item.summary || '';
+    document.getElementById('wd-amount').textContent   = item.supportType  || '정보 없음';
+    document.getElementById('wd-duration').textContent = item.supportCycle || '상시';
+    document.getElementById('wd-period').textContent   = item.supportCycle || '상시 접수';
+    var orgName = item.ministry || item.region || (item.source === '지자체' ? '지자체' : '보건복지부');
+    document.getElementById('wd-org').textContent      = (item.source || '중앙부처') + ' · ' + orgName;
+    document.getElementById('wd-link').href = item.url || 'https://www.bokjiro.go.kr';
+    updateWdHeart();
+
+    // 사이드 패널 열기 + 그리드 2열로 축소
+    var side = document.getElementById('wd-side');
+    var grid = document.getElementById('welfare-grid');
+    side.classList.add('open');
+    if (grid) {
+      grid.classList.remove('lg:grid-cols-3');
+      grid.classList.add('lg:grid-cols-2');
+    }
+    // 선택된 카드 강조
+    document.querySelectorAll('.welfare-card').forEach(function(c){ c.classList.remove('ring-2','ring-primary'); });
+    var sel = document.querySelector('.welfare-card[data-id="' + id + '"]');
+    if (sel) sel.classList.add('ring-2','ring-primary');
+  };
+
+  function updateWdHeart() {
+    if (!wCurrentItem) return;
+    var wished = getWished().includes(wCurrentItem.id);
+    var heart = document.getElementById('wd-heart');
+    if (!heart) return;
+    heart.setAttribute('fill',   wished ? '#f43f5e' : 'none');
+    heart.setAttribute('stroke', wished ? '#f43f5e' : '#aaa');
+  }
+
+  window.closeWelfareDetail = function() {
+    var side = document.getElementById('wd-side');
+    var grid = document.getElementById('welfare-grid');
+    side.classList.remove('open');
+    if (grid) {
+      grid.classList.remove('lg:grid-cols-2');
+      grid.classList.add('lg:grid-cols-3');
+    }
+    document.querySelectorAll('.welfare-card').forEach(function(c){ c.classList.remove('ring-2','ring-primary'); });
+    wCurrentItem = null;
+  };
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && !document.getElementById('wd-side').classList.contains('hidden'))
+      closeWelfareDetail();
+  });
+
+  window.wdToggleWish = function() {
+    if (!wCurrentItem) return;
+    toggleWishItem(wCurrentItem.id);
+    updateWdHeart();
+    var btn = document.getElementById('wf-heart-' + wCurrentItem.id);
+    if (btn) {
+      var wished = getWished().includes(wCurrentItem.id);
+      btn.innerHTML = '<svg width="18" height="18" fill="' + (wished?'#f43f5e':'none') + '" stroke="' + (wished?'#f43f5e':'currentColor') + '" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>';
+    }
+  };
+
+  function toggleWishItem(id) {
+    try {
+      var list = getWished();
+      var idx = list.indexOf(id);
+      if (idx >= 0) list.splice(idx, 1); else list.push(id);
+      localStorage.setItem('welfareWish', JSON.stringify(list));
+    } catch(e) {}
+  }
+
+  window.welfareToggleWish = function(id) {
+    toggleWishItem(id);
+    var wished = getWished().includes(id);
+    var btn = document.getElementById('wf-heart-' + id);
+    if (btn) btn.innerHTML = '<svg width="18" height="18" fill="' + (wished?'#f43f5e':'none') + '" stroke="' + (wished?'#f43f5e':'currentColor') + '" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>';
+    if (wCurrentItem && wCurrentItem.id === id) updateWdHeart();
+  };
+
+  // ── 페이지네이션 렌더 ─────────────────────────────────────────
+  function renderPagination(totalPages) {
+    var pg = document.getElementById('welfare-pagination');
+    if (totalPages <= 1) { pg.classList.add('hidden'); return; }
+    pg.classList.remove('hidden');
+    var cur = wState.page;
+    var html = '';
+    var btnBase = 'px-3 py-2 rounded-xl text-sm font-semibold border transition-all ';
+    var disabledCls = 'border-border text-muted-foreground opacity-40 cursor-not-allowed';
+    var normalCls   = 'border-border hover:bg-muted text-foreground';
+    var activeCls   = 'bg-primary border-primary text-background';
+    html += '<button onclick="setWelfarePage(' + Math.max(1,cur-1) + ')" ' + (cur===1?'disabled':'') + ' class="' + btnBase + (cur===1?disabledCls:normalCls) + '">←</button>';
+    var start = Math.max(1, cur-2), end = Math.min(totalPages, start+4);
+    if (end-start < 4) start = Math.max(1, end-4);
+    for (var i=start; i<=end; i++) {
+      html += '<button onclick="setWelfarePage(' + i + ')" class="' + btnBase + (i===cur?activeCls:normalCls) + '">' + i + '</button>';
+    }
+    html += '<button onclick="setWelfarePage(' + Math.min(totalPages,cur+1) + ')" ' + (cur===totalPages?'disabled':'') + ' class="' + btnBase + (cur===totalPages?disabledCls:normalCls) + '">→</button>';
+    pg.innerHTML = html;
+  }
+  window.setWelfarePage = function(p) {
+    wState.page = p;
+    closeWelfareDetail();
+    renderWelfareGrid();
+    document.getElementById('welfare-right').scrollIntoView({behavior:'smooth', block:'start'});
+  };
+
+  // ── 필터 UI ───────────────────────────────────────────────────
+  window.setWelfareSource = function(src) {
+    wState.source = src; wState.page = 1;
+    document.querySelectorAll('.welfare-source-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.source === src); });
+    renderWelfareGrid();
+  };
+  window.setWelfareCat = function(cat) {
+    wState.cat = cat; wState.page = 1;
+    document.querySelectorAll('.welfare-cat-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.cat === cat); });
+    renderWelfareGrid();
+  };
+  window.filterWelfare = function() {
+    wState.search = document.getElementById('welfare-search').value;
+    wState.page = 1;
+    renderWelfareGrid();
+  };
+
+  // ── goPage 훅 (app.js 로드 완료 후 등록) ────────────────────
+  window.addEventListener('load', function() {
+    var _origGoPage = window.goPage;
+    window.goPage = function(page) {
+      if (_origGoPage) _origGoPage(page);
+      if (page === 'welfare' && ALL_DATA.length === 0) loadWelfareData();
+    };
+  });
+
+  function escHtml(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+})();
+</script>
+
+</div>
+</body>
+</html>
